@@ -886,7 +886,7 @@ class Renderer:
             except:
                 logger.exception('Failed to process variable.')
                 image_file = None
-
+# TODO: check if this code is responsible for the grey rectangle in the badge pdf export
         if image_file:
             try:
                 ir = ThumbnailingImageReader(image_file)
