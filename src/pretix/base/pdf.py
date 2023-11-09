@@ -886,7 +886,6 @@ class Renderer:
             except:
                 logger.exception('Failed to process variable.')
                 image_file = None
-# TODO: check if this code is responsible for the grey rectangle in the badge pdf export
         if image_file:
             try:
                 ir = ThumbnailingImageReader(image_file)
@@ -907,28 +906,30 @@ class Renderer:
                     # refresh itself when it is used next.
                     del image_file.file
             except:
+                # Changed Alpha Channel and disabled fill, so it isn't drawing a grey rectangle
                 logger.exception("Can not load or resize image")
                 canvas.saveState()
-                canvas.setFillColorRGB(.8, .8, .8, alpha=1)
+                canvas.setFillColorRGB(.8, .8, .8, alpha=0)
                 canvas.rect(
                     x=float(o['left']) * mm,
                     y=float(o['bottom']) * mm,
                     width=float(o['width']) * mm,
                     height=float(o['height']) * mm,
                     stroke=0,
-                    fill=1,
+                    fill=0,
                 )
                 canvas.restoreState()
         else:
+            # Changed Alpha Channel and disabled fill, so it isn't drawing a grey rectangle
             canvas.saveState()
-            canvas.setFillColorRGB(.8, .8, .8, alpha=1)
+            canvas.setFillColorRGB(.8, .8, .8, alpha=0)
             canvas.rect(
                 x=float(o['left']) * mm,
                 y=float(o['bottom']) * mm,
                 width=float(o['width']) * mm,
                 height=float(o['height']) * mm,
                 stroke=0,
-                fill=1,
+                fill=0,
             )
             canvas.restoreState()
 
