@@ -66,8 +66,8 @@ from pypdf import PdfReader, PdfWriter, Transformation
 from pypdf.generic import RectangleObject
 from reportlab.graphics import renderPDF
 from reportlab.graphics.barcode.qr import QrCodeWidget
-from reportlab.graphics.shapes import Drawing
-from reportlab.lib.colors import Color
+from reportlab.graphics.shapes import Drawing, Rect
+from reportlab.lib.colors import Color, white
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
@@ -90,7 +90,6 @@ logger = logging.getLogger(__name__)
 
 if not settings.DEBUG:
     reportlab.rl_config.shapeChecking = 0
-
 
 DEFAULT_VARIABLES = OrderedDict((
     ("secret", {
@@ -335,17 +334,20 @@ DEFAULT_VARIABLES = OrderedDict((
     ("invoice_company", {
         "label": _("Invoice address company"),
         "editor_sample": _("Sample company"),
-        "evaluate": lambda op, order, ev: order.invoice_address.company if getattr(order, 'invoice_address', None) else ''
+        "evaluate": lambda op, order, ev: order.invoice_address.company if getattr(order, 'invoice_address',
+                                                                                   None) else ''
     }),
     ("invoice_street", {
         "label": _("Invoice address street"),
         "editor_sample": _("Sesame Street 42"),
-        "evaluate": lambda op, order, ev: order.invoice_address.street if getattr(order, 'invoice_address', None) else ''
+        "evaluate": lambda op, order, ev: order.invoice_address.street if getattr(order, 'invoice_address',
+                                                                                  None) else ''
     }),
     ("invoice_zipcode", {
         "label": _("Invoice address ZIP code"),
         "editor_sample": _("12345"),
-        "evaluate": lambda op, order, ev: order.invoice_address.zipcode if getattr(order, 'invoice_address', None) else ''
+        "evaluate": lambda op, order, ev: order.invoice_address.zipcode if getattr(order, 'invoice_address',
+                                                                                   None) else ''
     }),
     ("invoice_city", {
         "label": _("Invoice address city"),
@@ -360,7 +362,9 @@ DEFAULT_VARIABLES = OrderedDict((
     ("invoice_country", {
         "label": _("Invoice address country"),
         "editor_sample": _("Atlantis"),
-        "evaluate": lambda op, order, ev: str(getattr(order.invoice_address.country, 'name', '')) if getattr(order, 'invoice_address', None) else ''
+        "evaluate": lambda op, order, ev: str(getattr(order.invoice_address.country, 'name', '')) if getattr(order,
+                                                                                                             'invoice_address',
+                                                                                                             None) else ''
     }),
     ("addons", {
         "label": _("List of Add-Ons"),
@@ -524,7 +528,8 @@ def images_from_questions(sender, *args, **kwargs):
         else:
             a = op.answers.filter(question_id=question_id).first() or a
 
-        if not a or not a.file or not any(a.file.name.lower().endswith(e) for e in settings.FILE_UPLOAD_EXTENSIONS_QUESTION_IMAGE):
+        if not a or not a.file or not any(
+                a.file.name.lower().endswith(e) for e in settings.FILE_UPLOAD_EXTENSIONS_QUESTION_IMAGE):
             return None
         else:
             if etag:
@@ -591,7 +596,8 @@ def variables_from_questions(sender, *args, **kwargs):
 def _get_attendee_name_part(key, op, order, ev):
     name_parts = op.attendee_name_parts or (op.addon_to.attendee_name_parts if op.addon_to else {})
     if isinstance(key, tuple):
-        parts = [_get_attendee_name_part(c[0], op, order, ev) for c in key if not (c[0] == 'salutation' and name_parts.get(c[0], '') == "Mx")]
+        parts = [_get_attendee_name_part(c[0], op, order, ev) for c in key if
+                 not (c[0] == 'salutation' and name_parts.get(c[0], '') == "Mx")]
         return ' '.join(p for p in parts if p)
     value = name_parts.get(key, '')
     if key == 'salutation':
@@ -624,7 +630,8 @@ def get_variables(event):
     v['attendee_name_for_salutation'] = {
         'label': _("Attendee name for salutation"),
         'editor_sample': _("Mr Doe"),
-        'evaluate': lambda op, order, ev: concatenation_for_salutation(op.attendee_name_parts or (op.addon_to.attendee_name_parts if op.addon_to else {}))
+        'evaluate': lambda op, order, ev: concatenation_for_salutation(
+            op.attendee_name_parts or (op.addon_to.attendee_name_parts if op.addon_to else {}))
     }
 
     for key, label, weight in scheme['fields']:
@@ -647,7 +654,8 @@ def get_variables(event):
     v['invoice_name_for_salutation'] = {
         'label': _("Invoice address name for salutation"),
         'editor_sample': _("Mr Doe"),
-        'evaluate': lambda op, order, ev: concatenation_for_salutation(order.invoice_address.name_parts if getattr(order, 'invoice_address', None) else {})
+        'evaluate': lambda op, order, ev: concatenation_for_salutation(
+            order.invoice_address.name_parts if getattr(order, 'invoice_address', None) else {})
     }
 
     for key, label, weight in scheme['fields']:
@@ -780,8 +788,6 @@ class Renderer:
     def _draw_barcodearea(self, canvas: Canvas, op: OrderPosition, order: Order, o: dict):
         content = o.get('content', 'secret')
         if content == 'secret':
-            # do not use get_text_content because it uses a shortened version of secret
-            # and does not deal with our default value here properly
             content = op.secret
         else:
             content = self._get_text_content(op, order, o)
@@ -795,14 +801,15 @@ class Renderer:
         if len(content) > 128:
             level = 'L'
         reqs = float(o['size']) * mm
-        kwargs = {}
-        if o.get('nowhitespace', False):
-            kwargs['barBorder'] = 0
-        qrw = QrCodeWidget(content, barLevel=level, barHeight=reqs, barWidth=reqs, **kwargs)
-        d = Drawing(reqs, reqs)
-        d.add(qrw)
         qr_x = float(o['left']) * mm
         qr_y = float(o['bottom']) * mm
+
+        d = Drawing(reqs, reqs)
+        d.add(Rect(0, 0, reqs, reqs, strokeColor=None, fillColor=white))
+
+        qrw = QrCodeWidget(content, barLevel=level, barHeight=reqs, barWidth=reqs, barBorder=1)
+        d.add(qrw)
+
         renderPDF.draw(d, canvas, qr_x, qr_y)
 
         # Add QR content + PDF issuer as a hidden string (fully transparent & very very small)
