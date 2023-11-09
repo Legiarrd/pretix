@@ -541,17 +541,17 @@ class PortraitImageField(SizeValidationMixin, ExtValidationMixin, forms.FileFiel
                     f = SimpleUploadedFile(f.name, output.getvalue(), f.content_type)
                     f.image = image
 
-            if image.width > image.height:
-                raise ValidationError(
-                    self.error_messages['aspect_ratio_landscape'],
-                    code='aspect_ratio_landscape',
-                )
+            # if image.width > image.height:
+            #     raise ValidationError(
+            #         self.error_messages['aspect_ratio_landscape'],
+            #         code='aspect_ratio_landscape',
+            #     )
 
-            if not 3 / 4 * .95 < image.width / image.height < 3 / 4 * 1.05:  # give it some tolerance
-                raise ValidationError(
-                    self.error_messages['aspect_ratio_not_3_by_4'],
-                    code='aspect_ratio_not_3_by_4',
-                )
+            # if not 1 / 1 * .95 < image.width / image.height < 1 / 1 * 1.05:  # give it some tolerance
+            #     raise ValidationError(
+            #         self.error_messages['aspect_ratio_not_3_by_4'],
+            #         code='aspect_ratio_not_3_by_4',
+            #     )
         except Exception as exc:
             logger.exception('Could not parse image')
             # Pillow doesn't recognize it as an image.

@@ -1575,9 +1575,9 @@ class Question(LoggedModel):
                                                               'Currently not supported in our apps and during check-in'
                                                           ))
     valid_file_portrait = models.BooleanField(
-        default=False,
+        default=True,
         verbose_name=_('Validate file to be a portrait'),
-        help_text=_('If checked, files must be images with an aspect ratio of 3:4. This is commonly used for photos '
+        help_text=_('If checked, files must be images with an aspect ratio of 1:1. This is commonly used for photos '
                     'printed on badges.')
     )
 

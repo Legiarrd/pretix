@@ -92,7 +92,7 @@ function questions_init_photos(el) {
         })
 
         var cropper = new Cropper($container.find(".photo-preview img").get(0), {
-            aspectRatio: 3 / 4,
+            aspectRatio: 1 / 1,
             viewMode: 1,
             zoomable: false,
             crop: function (event) {
