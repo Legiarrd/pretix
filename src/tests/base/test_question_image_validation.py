@@ -17,7 +17,6 @@ def image_file():
    return _create
 
 from django import forms
-# ...
 
 @pytest.mark.django_db
 def test_cropped_image_field_ratio_3_4(image_file):
