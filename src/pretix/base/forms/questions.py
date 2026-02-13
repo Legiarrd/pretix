@@ -583,7 +583,7 @@ class CroppedImageField(SizeValidationMixin, ExtValidationMixin, forms.FileField
             if self.ratio:
                 w, h = map(float, self.ratio.split(':'))
                 ratio = w / h
-                if not ratio * .95 < image.width / image.height < ratio * 1.05:  # give it some tolerance
+                if not ratio * .95 < image.width / image.height < ratio * 1.05:
                     raise ValidationError(
                         self.error_messages['aspect_ratio_wrong'],
                         code='aspect_ratio_wrong',
