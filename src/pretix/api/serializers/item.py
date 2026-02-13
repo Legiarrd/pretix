@@ -541,6 +541,7 @@ class QuestionSerializer(I18nAwareModelSerializer):
     options = InlineQuestionOptionSerializer(many=True, required=False)
     identifier = serializers.CharField(allow_null=True)
     dependency_value = LegacyDependencyValueField(source='dependency_values', required=False, allow_null=True)
+    valid_file_portrait = serializers.BooleanField(required=False)
 
     class Meta:
         model = Question
@@ -548,7 +549,7 @@ class QuestionSerializer(I18nAwareModelSerializer):
                   'ask_during_checkin', 'show_during_checkin', 'identifier', 'dependency_question', 'dependency_values',
                   'hidden', 'dependency_value', 'print_on_invoice', 'help_text', 'valid_number_min',
                   'valid_number_max', 'valid_date_min', 'valid_date_max', 'valid_datetime_min', 'valid_datetime_max',
-                  'valid_string_length_max', 'valid_file_portrait')
+                  'valid_string_length_max', 'valid_file_portrait', 'valid_file_ratio')
 
     def validate_identifier(self, value):
         Question._clean_identifier(self.context['event'], value, self.instance)
