@@ -14,7 +14,7 @@ def forward(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pretixbase', '0298_alter_customer_locale_alter_user_locale'),
+        ('pretixbase', '0297_outgoingmail'),
     ]
 
     operations = [
